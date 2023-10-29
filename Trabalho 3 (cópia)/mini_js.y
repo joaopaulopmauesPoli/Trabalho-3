@@ -212,7 +212,10 @@ E : LVALUE '=' '{' '}'
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
   | LVALUE '=' E 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
-  | LVALUEPROP '=' E 	
+  | LVALUEPROP '=' E 	 	
+  | LVALUE MAIS_IGUAL E 
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "+" + "="; }
+  | LVALUEPROP MAIS_IGUAL E  	
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
