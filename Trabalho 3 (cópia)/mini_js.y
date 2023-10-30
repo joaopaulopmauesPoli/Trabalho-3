@@ -294,7 +294,7 @@ void checa_simbolo( string nome, bool modificavel ) {
     }
   }
   else {
-    cerr << "Variavel '" << nome << "' não declarada." << endl;
+    cerr << "Erro: a variável '" << nome << "' não foi declarada." << endl;
     exit( 1 );     
   }
 }
