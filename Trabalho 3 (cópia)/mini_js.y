@@ -91,9 +91,9 @@ void print( vector<string> codigo ) {
 %token AND OR ME_IG MA_IG DIF IGUAL
 %token MAIS_IGUAL MAIS_MAIS
 
-%right '=' MAIS_IGUAL
+%right '=' IGUAL
 %nonassoc '<' '>'
-%left '+' '-' MAIS_MAIS
+%left '+' '-'
 %left '*' '/' '%'
 %left '['
 %left '.'
@@ -232,6 +232,8 @@ E : LVALUE '=' '{' '}'
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
     { $$.c = $1.c + $3.c + $2.c; }
+  | E IGUAL E
+    { $$.c = $1.c + $3.c + $2.c; }
   | E '+' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '-' E
@@ -259,7 +261,6 @@ E : LVALUE '=' '{' '}'
   | '[' ']'
     { $$.c = vector<string>{"[]"}; }
   ;
-  ;
   
   
 %%
@@ -279,8 +280,8 @@ vector<string> declara_var( TipoDecl tipo, string nome, int linha, int coluna ) 
     return vector<string>{};
   } 
   else {
-    cerr << "Variavel '" << nome << "' já declarada na linha: " << ts[nome].linha 
-         << ", coluna: " << ts[nome].coluna << endl;
+    cerr << "Erro: a variável '" << nome << "' ja foi declarada na linha " << ts[nome].linha 
+         << "." << endl; //, coluna: " << ts[nome].coluna << endl;
     exit( 1 );     
   }
 }
