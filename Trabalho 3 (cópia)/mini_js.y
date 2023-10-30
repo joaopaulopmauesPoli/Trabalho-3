@@ -91,11 +91,10 @@ void print( vector<string> codigo ) {
 %token AND OR ME_IG MA_IG DIF IGUAL
 %token MAIS_IGUAL MAIS_MAIS
 
-%right '='
+%right '=' MAIS_IGUAL
 %nonassoc '<' '>'
-%left '+' '-'
+%left '+' '-' MAIS_MAIS
 %left '*' '/' '%'
-
 %left '['
 %left '.'
 
@@ -199,6 +198,19 @@ CMD_IF : IF '(' E ')' CMD ELSE CMD
                    definicao_lbl_fim_if         // Fim do IF
                    ;
          }
+         |IF '(' E ')' CMD
+         { string lbl_true = gera_label( "lbl_true" );
+           string lbl_fim_if = gera_label( "lbl_fim_if" );
+           string definicao_lbl_true = ":" + lbl_true;
+           string definicao_lbl_fim_if = ":" + lbl_fim_if;
+                    
+            $$.c = $3.c +                       // Codigo da expressão
+                   lbl_true + "?" +             // Código do IF
+                   lbl_fim_if + "#" +           // Código do False
+                   definicao_lbl_true + $5.c +  // Código do True
+                   definicao_lbl_fim_if         // Fim do IF
+                   ;
+         }
        ;
         
 LVALUE : ID 
@@ -212,10 +224,10 @@ E : LVALUE '=' '{' '}'
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
   | LVALUE '=' E 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
-  | LVALUEPROP '=' E 	 	
+  | LVALUEPROP '=' E 	
   | LVALUE MAIS_IGUAL E 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "+" + "="; }
-  | LVALUEPROP MAIS_IGUAL E  	
+  | LVALUEPROP MAIS_IGUAL E 
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
@@ -224,6 +236,8 @@ E : LVALUE '=' '{' '}'
     { $$.c = $1.c + $3.c + $2.c; }
   | E '-' E
     { $$.c = $1.c + $3.c + $2.c; }
+  | LVALUE MAIS_MAIS
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + "1" + "+" + "="; }
   | E '*' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '/' E
@@ -233,7 +247,7 @@ E : LVALUE '=' '{' '}'
   | CDOUBLE
   | CINT
   | CSTRING
-  | LVALUE 
+  | LVALUE
     { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; } 
   | LVALUEPROP  
   | '(' E ')'
@@ -245,6 +259,7 @@ E : LVALUE '=' '{' '}'
   | '[' ']'
     { $$.c = vector<string>{"[]"}; }
   ;
+  ;
   
   
 %%
@@ -252,8 +267,8 @@ E : LVALUE '=' '{' '}'
 #include "lex.yy.c"
 
 vector<string> declara_var( TipoDecl tipo, string nome, int linha, int coluna ) {
-  // cerr << "insere_simbolo( " << tipo << ", " << nome 
-  //     << ", " << linha << ", " << coluna << ")" << endl;
+ // cerr << "insere_simbolo( " << tipo << ", " << nome 
+ //      << ", " << linha << ", " << coluna << ")" << endl;
        
   if( ts.count( nome ) == 0 ) {
     ts[nome] = Simbolo{ tipo, linha, coluna };
