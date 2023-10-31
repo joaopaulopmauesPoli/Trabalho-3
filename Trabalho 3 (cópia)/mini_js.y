@@ -114,8 +114,11 @@ CMD : CMD_LET ';'
     | CMD_IF
     | PRINT E ';' 
       { $$.c = $2.c + "println" + "#"; }
-    | CMD_FOR
+    | CMD_FOR  
+    | CMD_FOR ';'
     | E ';'
+      { $$.c = $1.c + "^"; };
+    | E ';' ';'
       { $$.c = $1.c + "^"; };
     | '{' CMDs '}'  
       { $$.c = $2.c; }
