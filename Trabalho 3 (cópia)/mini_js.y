@@ -217,17 +217,23 @@ LVALUE : ID
        ;
        
 LVALUEPROP : E '[' E ']'
+              { $$.c = $1.c+ $3.c; }
            | E '.' ID  
+              { $$.c = $1.c+ $3.c; }
+           | E '.' ID '[' E ']'
+              { $$.c = $1.c + $3.c + "[@]" + $5.c; }
            ;
 
 E : LVALUE '=' '{' '}'
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "{}" + "="; }
   | LVALUE '=' E 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $3.c + "="; }
-  | LVALUEPROP '=' E 	
+  | LVALUEPROP '=' E 	 	
+    { $$.c = $1.c + $3.c + "[=]"; }
   | LVALUE MAIS_IGUAL E 
     { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + $3.c + "+" + "="; }
   | LVALUEPROP MAIS_IGUAL E 
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "[@]" + $3.c + "+" + "[=]"; }
   | E '<' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '>' E
@@ -236,10 +242,12 @@ E : LVALUE '=' '{' '}'
     { $$.c = $1.c + $3.c + $2.c; }
   | E '+' E
     { $$.c = $1.c + $3.c + $2.c; }
+  | '-' E
+    { $$.c = "0" + $2.c + $1.c; }
   | E '-' E
     { $$.c = $1.c + $3.c + $2.c; }
   | LVALUE MAIS_MAIS
-    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + $1.c + "@" + "1" + "+" + "="; }
+    { checa_simbolo( $1.c[0], true ); $$.c = $1.c + "@" + $1.c + "1" + $1.c + "@" + "+" + "=" + "^"; }
   | E '*' E
     { $$.c = $1.c + $3.c + $2.c; }
   | E '/' E
@@ -251,7 +259,8 @@ E : LVALUE '=' '{' '}'
   | CSTRING
   | LVALUE
     { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "@"; } 
-  | LVALUEPROP  
+  | LVALUEPROP 
+    { checa_simbolo( $1.c[0], false ); $$.c = $1.c + "[@]"; }  
   | '(' E ')'
     { $$.c = $2.c; }
   | '(' '{' '}' ')'
